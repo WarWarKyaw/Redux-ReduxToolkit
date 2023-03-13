@@ -1,5 +1,7 @@
 const redux = require("redux");
 const createStore = redux.createStore;
+const combineReducers = redux.combineReducers;
+const bindActionCreators = redux.bindActionCreators;
 
 // action type
 const CAKE_ORDERED = "CAKE_ORDERED";
@@ -43,13 +45,50 @@ function restockIceCream(qty = 1) {
 }
 
 // Declare the initial state
-const initialState = {
+// const initialState = {
+//   numOfCakes: 10,
+//   numOfIceCreams: 20,
+// };
+
+const initialCakeState = {
   numOfCakes: 10,
+};
+
+const initialIceCreamstate = {
   numOfIceCreams: 20,
 };
 
 // (previousState, action) => newState
-const reducer = (state = initialState, action) => {
+// const reducer = (state = initialState, action) => {
+//   switch (action.type) {
+//     case CAKE_ORDERED:
+//       return {
+//         ...state,
+//         numOfCakes: state.numOfCakes - action.payload,
+//       };
+//     case CAKE_RESTOCKED:
+//       return {
+//         ...state,
+//         numOfCakes: state.numOfCakes + action.payload,
+//       };
+
+//     case ICECREAM_ORDERED:
+//       return {
+//         ...state,
+//         numOfIceCreams: state.numOfIceCreams - action.payload,
+//       };
+//     case ICECREAM_RESTOCKED:
+//       return {
+//         ...state,
+//         numOfIceCreams: state.numOfIceCreams + action.payload,
+//       };
+
+//     default:
+//       return state;
+//   }
+// };
+
+const cakeReducer = (state = initialCakeState, action) => {
   switch (action.type) {
     case CAKE_ORDERED:
       return {
@@ -61,7 +100,13 @@ const reducer = (state = initialState, action) => {
         ...state,
         numOfCakes: state.numOfCakes + action.payload,
       };
+    default:
+      return state;
+  }
+};
 
+const iceCreamReducer = (state = initialIceCreamstate, action) => {
+  switch (action.type) {
     case ICECREAM_ORDERED:
       return {
         ...state,
@@ -72,14 +117,19 @@ const reducer = (state = initialState, action) => {
         ...state,
         numOfIceCreams: state.numOfIceCreams + action.payload,
       };
-
     default:
       return state;
   }
 };
 
 // Create the store
-const store = createStore(reducer);
+// const store = createStore(rootReducer);
+
+const rootReducer = combineReducers({
+  cake: cakeReducer,
+  iceCream: iceCreamReducer,
+});
+const store = createStore(rootReducer);
 
 // Allow access to state via getState()
 console.log("Initial State ", store.getState());
@@ -89,13 +139,27 @@ const unsubscribe = store.subscribe(() => {
   console.log("Updated State ", store.getState());
 });
 
-// Allow state to be updated via dispatch(action)
-store.dispatch(orderCake());
-store.dispatch(orderCake());
-store.dispatch(orderCake());
-store.dispatch(restockCake(3));
-store.dispatch(orderIceCream(2));
-store.dispatch(restockIceCream(2));
+// // Allow state to be updated via dispatch(action)
+// store.dispatch(orderCake());
+// store.dispatch(orderCake());
+// store.dispatch(orderCake());
+// store.dispatch(restockCake(3));
+// store.dispatch(orderIceCream(2));
+// store.dispatch(restockIceCream(2));
+
+// bind action creators
+const actions = bindActionCreators(
+  { orderCake, restockCake, orderIceCream, restockIceCream },
+  store.dispatch
+);
+
+actions.orderCake();
+actions.orderCake();
+actions.orderCake();
+actions.restockCake(3);
+actions.orderIceCream();
+actions.orderIceCream();
+actions.restockIceCream(2);
 
 // Remove the listener
 unsubscribe();
