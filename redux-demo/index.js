@@ -1,7 +1,11 @@
 const redux = require("redux");
 const createStore = redux.createStore;
-const combineReducers = redux.combineReducers;
 const bindActionCreators = redux.bindActionCreators;
+const combineReducers = redux.combineReducers;
+const applyMiddleWare = redux.applyMiddleware;
+
+const reduxLogger = require("redux-logger");
+const logger = reduxLogger.createLogger();
 
 // action type
 const CAKE_ORDERED = "CAKE_ORDERED";
@@ -27,6 +31,7 @@ function restockCake(qty = 1) {
   };
 }
 
+// action creator that returns action
 function orderIceCream(qty = 1) {
   // action object
   return {
@@ -71,7 +76,6 @@ const initialIceCreamstate = {
 //         ...state,
 //         numOfCakes: state.numOfCakes + action.payload,
 //       };
-
 //     case ICECREAM_ORDERED:
 //       return {
 //         ...state,
@@ -82,7 +86,6 @@ const initialIceCreamstate = {
 //         ...state,
 //         numOfIceCreams: state.numOfIceCreams + action.payload,
 //       };
-
 //     default:
 //       return state;
 //   }
@@ -117,42 +120,39 @@ const iceCreamReducer = (state = initialIceCreamstate, action) => {
         ...state,
         numOfIceCreams: state.numOfIceCreams + action.payload,
       };
+    case CAKE_ORDERED:
+      return { ...state, numOfIceCreams: state.numOfIceCreams - 1 };
     default:
       return state;
   }
 };
 
-// Create the store
-// const store = createStore(rootReducer);
-
+// Combine the reducers
 const rootReducer = combineReducers({
   cake: cakeReducer,
   iceCream: iceCreamReducer,
 });
-const store = createStore(rootReducer);
+
+// Create the store
+const store = createStore(rootReducer, applyMiddleWare(logger));
 
 // Allow access to state via getState()
 console.log("Initial State ", store.getState());
 
 // Register listener via subscribe(listener)
-const unsubscribe = store.subscribe(() => {
-  console.log("Updated State ", store.getState());
-});
+const unsubscribe = store.subscribe(() => {});
 
-// // Allow state to be updated via dispatch(action)
+// Allow state to be updated via dispatch(action)
 // store.dispatch(orderCake());
 // store.dispatch(orderCake());
 // store.dispatch(orderCake());
 // store.dispatch(restockCake(3));
-// store.dispatch(orderIceCream(2));
-// store.dispatch(restockIceCream(2));
 
 // bind action creators
 const actions = bindActionCreators(
   { orderCake, restockCake, orderIceCream, restockIceCream },
   store.dispatch
 );
-
 actions.orderCake();
 actions.orderCake();
 actions.orderCake();
